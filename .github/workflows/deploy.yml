@@ -30,8 +30,7 @@ jobs:
           script: |
             cd /projects/liquipedia-scraper-api
             git pull
-            npm ci
-            npm run build
+            yarn run build
             
             # Create .env file from secrets
             echo "PORT=${{ secrets.PORT }}" > .env
