@@ -8,33 +8,55 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-      
+
+      # Set up Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
-          
+          node-version: '22' # Ensure this matches your project's Node.js version
+
+      # Install project dependencies
       - name: Install dependencies
-        run: yarn
-        
+        run: yarn --frozen-lockfile # Using --frozen-lockfile is recommended in CI
+
+      # Build the application
       - name: Build application
         run: yarn run build
-        
+
+      # Deploy to VPS using SSH
+      # Using a specific version tag (e.g., v0.1.8) is recommended instead of @master
+      # Check the action's GitHub page for the latest stable version
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v0.1.8 # Changed from @master to a specific version tag
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          key: ${{ secrets.VPS_SSH_KEY }} # Ensure this is your private SSH key for the VPS user
           script: |
-            cd /projects/liquipedia-scraper-api
-            git pull
-            yarn run build
-            
-            # Create .env file from secrets
-            echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+            # Navigate to the project directory on the VPS
+            cd /projects/liquipedia-scraper-api || exit 1 # Add exit 1 in case directory doesn't exist
+
+            # Pull the latest code from the repository
+            git pull origin main # Specify origin and branch for clarity
+
+            # Install/update dependencies on the VPS (if needed, depending on your setup)
+            # You might not need this if your build includes node_modules or if you build locally
+            # If you build locally and copy files, you might skip this or adjust
+            # yarn install --production # Example: install production dependencies only
+
+            # Build the application on the VPS (if you didn't build locally and copy)
+            # If you built locally in the previous step and are syncing files, you might skip this
+            yarn run build || exit 1 # Ensure build command exits with error if it fails
+
+            # Create or update the .env file from GitHub secrets
+            # This overwrites the file each time, ensure this is desired behavior
+            echo "API_KEY=${{ secrets.API_KEY }}" > .env # Use > to overwrite
             echo "NODE_ENV=production" >> .env
-            
-            # Restart the service (using PM2 or similar)
+
+            # Restart the application service using PM2
+            # This command assumes PM2 is installed and the process name is 'liquipedia-scraper-api'
+            # The '||' provides a fallback to start if it's not already running
             pm2 restart liquipedia-scraper-api || pm2 start dist/index.js --name liquipedia-scraper-api
+
