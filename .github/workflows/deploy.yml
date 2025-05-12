@@ -33,8 +33,6 @@ jobs:
             yarn run build
             
             # Create .env file from secrets
-            echo "PORT=${{ secrets.PORT }}" > .env
-            echo "HOST=${{ secrets.HOST }}" >> .env
             echo "API_KEY=${{ secrets.API_KEY }}" >> .env
             echo "NODE_ENV=production" >> .env
             
