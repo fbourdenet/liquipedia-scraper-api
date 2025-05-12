@@ -4,12 +4,6 @@ import { serverConfig } from "./config/server.config";
 
 const server: FastifyInstance = Fastify({
   logger: true,
-  disableRequestLogging: true,
-  ajv: {
-    customOptions: {
-      coerceTypes: 'array'
-    }
-  }
 });
 
 server.register(registerUpcomingMatchesRoutes, { prefix: "/upcoming-matches" });
@@ -23,7 +17,7 @@ const start = async () => {
     
     await server.listen({ port: serverConfig.port, host: serverConfig.host });
     const address = server.server.address();
-    
+
     console.log(`Server listening at ${address?.toString()}`);
   } catch (err) {
     server.log.error(err as Error);
