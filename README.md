@@ -1,0 +1,1 @@
+# liquipedia-scraper-api
