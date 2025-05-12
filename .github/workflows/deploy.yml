@@ -1,0 +1,43 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /projects/liquipedia-scraper-api
+            git pull
+            npm ci
+            npm run build
+            
+            # Create .env file from secrets
+            echo "PORT=${{ secrets.PORT }}" > .env
+            echo "HOST=${{ secrets.HOST }}" >> .env
+            echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+            echo "NODE_ENV=production" >> .env
+            
+            # Restart the service (using PM2 or similar)
+            pm2 restart liquipedia-scraper-api || pm2 start dist/index.js --name liquipedia-scraper-api
