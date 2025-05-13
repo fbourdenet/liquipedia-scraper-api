@@ -16,37 +16,35 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22' # Adjust Node.js version if needed
+          node-version: '20' # Adjust Node.js version if needed
 
       - name: Install dependencies
-        run: npm install --frozen-lockfile # Using npm install
+        run: npm ci
 
       - name: Build TypeScript project
-        run: npm run build # Using npm run build
+        run: npm run build
 
       - name: Create .env file
         run: |
           echo "NODE_ENV=production" > .env
           echo "API_KEY=${{ secrets.API_KEY }}" >> .env
 
-      - name: Deploy to VPS with PM2 (Debugging)
+      - name: Deploy to VPS with PM2
         run: |
-          echo "--- Debugging Deploy Step ---"
-          echo "Finding global npm bin directory..."
-          # Use the determined prefix to construct the bin path
-          NPM_PREFIX=$(npm config get prefix)
-          NPM_GLOBAL_BIN="$NPM_PREFIX/bin"
-          echo "Global npm bin directory found: $NPM_GLOBAL_BIN"
+          echo "--- Deploy Step ---"
+          # Hardcode the correct path to the global npm bin directory on your VPS
+          # REPLACE THIS WITH THE ACTUAL PATH YOU FOUND ON YOUR VPS
+          NPM_GLOBAL_BIN_ON_VPS="/home/florian/.npm-global/bin"
+          echo "Adding '$NPM_GLOBAL_BIN_ON_VPS' to PATH"
 
-          echo "Current PATH: $PATH"
-          export PATH="$PATH:$NPM_GLOBAL_BIN"
+          export PATH="$PATH:$NPM_GLOBAL_BIN_ON_VPS"
           echo "Updated PATH: $PATH"
 
-          echo "Checking if PM2 is in PATH..."
-          which pm2 || echo "PM2 not found in updated PATH"
+          echo "Checking if PM2 is now in PATH..."
+          which pm2 || echo "PM2 still not found in updated PATH. Check the hardcoded path."
 
           echo "Attempting PM2 command..."
           set -x
           pm2 describe liquipedia-scraper-api > /dev/null 2>&1 && pm2 restart liquipedia-scraper-api || pm2 start dist/index.js --name liquipedia-scraper-api
           set +x
-          echo "--- Debugging Complete ---"
+          echo "--- Deploy Step Complete ---"
