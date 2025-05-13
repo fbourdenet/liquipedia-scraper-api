@@ -1,3 +1,4 @@
+# .github/workflows/deploy.yml
 name: Deploy to VPS
 
 on:
@@ -7,17 +8,21 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3 # Use a standard action to set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: '22' # Specify the Node.js version you want to use
+          node-version: '20' # Adjust Node.js version if needed
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --frozen-lockfile # Using npm install
+
+      - name: Build TypeScript project
+        run: npm run build # Using npm run build
 
       - name: Create .env file
         run: |
@@ -25,5 +30,10 @@ jobs:
           echo "API_KEY=${{ secrets.API_KEY }}" >> .env
 
       - name: Deploy to VPS with PM2
-        run: pm2 restart liquipedia-scraper-api ||
-          pm2 start dist/index.js --name liquipedia-scraper-api
+        run: |
+          # Find the global npm bin directory
+          NPM_GLOBAL_BIN=$(npm bin -g)
+          # Add the global bin directory to the PATH for this step
+          export PATH="$PATH:$NPM_GLOBAL_BIN"
+          # Check if PM2 process exists and restart, otherwise start
+          pm2 describe liquipedia-scraper-api > /dev/null 2>&1 && pm2 restart liquipedia-scraper-api || pm2 start dist/index.js --name liquipedia-scraper-api
