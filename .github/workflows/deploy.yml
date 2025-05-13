@@ -11,8 +11,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3 # Use a standard action to set up Node.js
+        with:
+          node-version: '22' # Specify the Node.js version you want to use
+
       - name: Install dependencies
-        run: yarn
+        run: npm install
 
       - name: Create .env file
         run: |
