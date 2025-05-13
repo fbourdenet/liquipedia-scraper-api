@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20' # Adjust Node.js version if needed
+          node-version: '22' # Adjust Node.js version if needed
 
       - name: Install dependencies
         run: npm install --frozen-lockfile # Using npm install
