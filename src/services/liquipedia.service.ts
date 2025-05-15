@@ -3,6 +3,7 @@ import { Match, Team, Tournament } from "../interfaces/match.interface";
 import { GAME_NAME_MAPPING } from "../config/games.config";
 import { Player } from "../interfaces/player.interface";
 import { TournamentResult } from "../interfaces/tournament.interface";
+import { formatDate } from "../utils/date.util";
 
 export class LiquipediaService {
   private baseUrl: string = "https://liquipedia.net";

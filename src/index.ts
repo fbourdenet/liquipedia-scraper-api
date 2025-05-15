@@ -1,12 +1,14 @@
 import Fastify, { FastifyInstance } from "fastify";
 import { serverConfig } from "./config/server.config";
 import { registerLiquipediaRoutes } from "./routes/liquipedia/liquipedia.route";
+import { registerCacheRoutes } from "./routes/cache/cache.route";
 
 const server: FastifyInstance = Fastify({
   logger: true,
 });
 
 server.register(registerLiquipediaRoutes, { prefix: "/liquipedia" });
+server.register(registerCacheRoutes, { prefix: "/cache" });
 
 const start = async () => {
   try {
