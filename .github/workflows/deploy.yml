@@ -7,31 +7,27 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          path: ./projects/liquipedia-scraper-api
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
-
-      - name: Change to project directory
-        run: cd ./projects/liquipedia-scraper-api
+          node-version: '22' 
 
       - name: Install dependencies
-        working-directory: ./projects/liquipedia-scraper-api
-        run: npm install
+        run: npm ci
+
+      - name: Build TypeScript project
+        run: npm run build
 
       - name: Create .env file
-        working-directory: ./projects/liquipedia-scraper-api
         run: |
-          echo "NODE_ENV=production" > .env
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" > .env
           echo "API_KEY=${{ secrets.API_KEY }}" >> .env
-
+          echo "PORT=${{ secrets.PORT }}" >> .env
       - name: Deploy to VPS with PM2
-        working-directory: ./projects/liquipedia-scraper-api
-        run: pm2 restart liquipedia-scraper-api ||
-          pm2 start dist/index.js --name liquipedia-scraper-api
+        run: |
+          pm2 restart liquipedia-scraper-api || pm2 start dist/index.js --name liquipedia-scraper-api

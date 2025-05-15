@@ -1,5 +1,6 @@
 export interface Team {
     name: string | null;
+    tag: string | null;
     icon: string | null;
   }
   

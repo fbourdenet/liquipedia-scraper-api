@@ -1,20 +1,22 @@
 import Fastify, { FastifyInstance } from "fastify";
-import { registerUpcomingMatchesRoutes } from "./routes/upcoming-matches/upcoming-matches.route";
 import { serverConfig } from "./config/server.config";
+import { registerLiquipediaRoutes } from "./routes/liquipedia/liquipedia.route";
 
 const server: FastifyInstance = Fastify({
   logger: true,
 });
 
-server.register(registerUpcomingMatchesRoutes, { prefix: "/upcoming-matches" });
+server.register(registerLiquipediaRoutes, { prefix: "/liquipedia" });
 
-// Run the server
 const start = async () => {
   try {
-    // Log authentication mode
     console.log(`Starting server in ${serverConfig.env} mode`);
-    console.log(`Authentication is ${serverConfig.env === 'development' ? 'DISABLED' : 'ENABLED'}`);
-    
+    console.log(
+      `Authentication is ${
+        serverConfig.env === "development" ? "DISABLED" : "ENABLED"
+      }`
+    );
+
     await server.listen({ port: serverConfig.port, host: serverConfig.host });
     const address = server.server.address();
 
